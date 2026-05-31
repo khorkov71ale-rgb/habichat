@@ -1,8 +1,8 @@
 const express = require('express');
 const path = require('path');
-const { ensureDb } = require('../database/db');
+const { ensureDb } = require('./database/db');
 
-const rootDir = path.join(__dirname, '..');
+const rootDir = __dirname;
 let appInstance = null;
 
 function createApp() {
@@ -34,16 +34,16 @@ function createApp() {
     app.use(express.static(path.join(rootDir, 'public')));
   }
 
-  app.use('/api/habits', require('../routes/habits'));
-  app.use('/api/social', require('../routes/social'));
-  app.use('/api/challenges', require('../routes/challenges'));
-  app.use('/api/analytics', require('../routes/analytics'));
-  app.use('/api/premium', require('../routes/premium'));
-  app.use('/api/dashboard', require('../routes/dashboard'));
+  app.use('/api/habits', require('./routes/habits'));
+  app.use('/api/social', require('./routes/social'));
+  app.use('/api/challenges', require('./routes/challenges'));
+  app.use('/api/analytics', require('./routes/analytics'));
+  app.use('/api/premium', require('./routes/premium'));
+  app.use('/api/dashboard', require('./routes/dashboard'));
 
   app.post('/webhook', async (req, res) => {
     try {
-      const { initBot, getBot } = require('../bot');
+      const { initBot, getBot } = require('./bot');
       if (!getBot()) initBot();
       const bot = getBot();
       if (bot && req.body) bot.processUpdate(req.body);

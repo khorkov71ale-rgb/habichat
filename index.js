@@ -6,7 +6,7 @@ const express = require('express');
 let app;
 
 try {
-  const { createApp } = require('./lib/express-app');
+  const { createApp } = require('./express-app');
   app = createApp();
 } catch (err) {
   console.error('Failed to create app:', err);
