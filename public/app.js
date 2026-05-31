@@ -56,34 +56,116 @@ const screens = {
   premium: { el: 'premium', render: renderPremium, load: loadPremium },
 };
 
+const screenCache = new Set();
 let currentScreen = 'dashboard';
+let navToken = 0;
+let firstLoad = true;
 
-async function navigate(name) {
-  if (!screens[name]) return;
-  currentScreen = name;
-  document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
-  document.getElementById(name).classList.add('active');
+const SKELETONS = {
+  dashboard: `
+    <header class="screen-header"><h1>Сегодня</h1></header>
+    <div class="skeleton skeleton-card"></div>
+    <div class="skeleton skeleton-card"></div>
+  `,
+  habits: `
+    <header class="screen-header"><h1>Мои привычки</h1><span class="header-placeholder"></span></header>
+    <div class="skeleton skeleton-card"></div>
+    <div class="skeleton skeleton-card"></div>
+  `,
+  social: `
+    <header class="screen-header"><h1>Лента</h1></header>
+    <div class="skeleton skeleton-card"></div>
+  `,
+  challenges: `
+    <header class="screen-header"><h1>Челленджи</h1></header>
+    <div class="skeleton skeleton-card"></div>
+  `,
+  progress: `
+    <header class="screen-header"><h1>Прогресс</h1></header>
+    <div class="skeleton skeleton-card"></div>
+  `,
+  premium: `
+    <header class="screen-header"><h1>Premium</h1></header>
+    <div class="skeleton skeleton-card"></div>
+  `,
+};
+
+function showSkeleton(name) {
+  const el = document.getElementById(name);
+  if (!el) return;
+  el.innerHTML = SKELETONS[name] || '<div class="screen-inline-loader"></div>';
+}
+
+function switchScreen(name) {
+  document.querySelectorAll('.screen').forEach((s) => {
+    const isActive = s.id === name;
+    s.classList.toggle('active', isActive);
+    s.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+  });
   document.querySelectorAll('.nav-btn').forEach((b) => {
     b.classList.toggle('active', b.dataset.screen === name);
   });
-  screens[name].render();
+}
+
+async function navigate(name) {
+  if (!screens[name] || name === currentScreen) return;
+
+  const token = ++navToken;
+  currentScreen = name;
+
+  switchScreen(name);
+
+  const cached = screenCache.has(name);
+  if (cached) {
+    screens[name].render();
+  } else {
+    showSkeleton(name);
+  }
+
+  if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+
   try {
-    setLoading(true);
+    if (firstLoad) setLoading(true);
     await screens[name].load();
+    if (token !== navToken) return;
+
+    screenCache.add(name);
     screens[name].render();
   } catch (e) {
+    if (token !== navToken) return;
     showToast(e.message || 'Ошибка загрузки');
+    if (!cached) {
+      showSkeleton(name);
+      const el = document.getElementById(name);
+      if (el) {
+        el.insertAdjacentHTML(
+          'beforeend',
+          '<p class="empty-state">Не удалось загрузить. Попробуйте ещё раз.</p>'
+        );
+      }
+    } else if (screenCache.has(name)) {
+      screens[name].render();
+    }
   } finally {
-    setLoading(false);
+    if (firstLoad) {
+      setLoading(false);
+      firstLoad = false;
+    }
   }
-  if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+}
+
+/** Сбросить кэш экрана после изменения данных */
+export function invalidateScreen(name) {
+  screenCache.delete(name);
+  if (name === 'dashboard') {
+    screenCache.delete('habits');
+  }
 }
 
 document.querySelectorAll('.nav-btn').forEach((btn) => {
   btn.addEventListener('click', () => navigate(btn.dataset.screen));
 });
 
-Object.values(screens).forEach((s) => s.render());
 navigate('dashboard');
 
 export { navigate, tg };

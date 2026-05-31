@@ -1,4 +1,4 @@
-import { api, showToast } from '../app.js';
+import { api, showToast, invalidateScreen } from '../app.js';
 
 let data = { todayHabits: [], stats: {}, friendsToday: [] };
 
@@ -56,6 +56,7 @@ export function renderDashboard() {
           await api(`/habits/${id}/complete`, { method: 'POST', body: '{}' });
           showToast('Отлично! 🔥');
         }
+        invalidateScreen('habits');
         await loadDashboard();
         renderDashboard();
       } catch (e) {

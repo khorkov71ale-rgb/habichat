@@ -9,12 +9,14 @@
 </head>
 <body>
   <div id="app">
-    <div id="dashboard" class="screen active"></div>
-    <div id="habits" class="screen"></div>
-    <div id="social" class="screen"></div>
-    <div id="challenges" class="screen"></div>
-    <div id="progress" class="screen"></div>
-    <div id="premium" class="screen"></div>
+    <div class="screens-stack">
+      <div id="dashboard" class="screen active" aria-hidden="false"></div>
+      <div id="habits" class="screen" aria-hidden="true"></div>
+      <div id="social" class="screen" aria-hidden="true"></div>
+      <div id="challenges" class="screen" aria-hidden="true"></div>
+      <div id="progress" class="screen" aria-hidden="true"></div>
+      <div id="premium" class="screen" aria-hidden="true"></div>
+    </div>
 
     <nav class="bottom-nav">
       <button class="nav-btn active" data-screen="dashboard" aria-label="Главная">🏠</button>

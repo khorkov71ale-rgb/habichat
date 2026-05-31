@@ -31,15 +31,68 @@ body {
   margin: 0 auto;
 }
 
-.screen {
-  display: none;
-  padding: 16px;
-  padding-bottom: 80px;
+.screens-stack {
+  position: relative;
   min-height: calc(100vh - var(--nav-height));
 }
 
-.screen.active {
+.screen {
   display: block;
+  padding: 16px;
+  padding-bottom: 80px;
+  min-height: calc(100vh - var(--nav-height));
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.22s ease, visibility 0.22s ease;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+}
+
+.screen.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.header-placeholder {
+  width: 40px;
+  height: 40px;
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--tg-theme-secondary-bg-color, #eee) 25%,
+    rgba(255, 255, 255, 0.5) 50%,
+    var(--tg-theme-secondary-bg-color, #eee) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+  border-radius: var(--card-radius);
+  margin-bottom: 10px;
+}
+
+.skeleton-card {
+  height: 72px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.screen-inline-loader {
+  min-height: 120px;
 }
 
 header.screen-header {
@@ -54,7 +107,8 @@ header.screen-header h1 {
   font-weight: 700;
 }
 
-header.screen-header button {
+header.screen-header button,
+.header-icon-btn {
   background: var(--tg-theme-secondary-bg-color, #f0f0f0);
   border: none;
   width: 40px;
@@ -62,6 +116,7 @@ header.screen-header button {
   border-radius: 50%;
   font-size: 1.1rem;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .habit-card {
@@ -151,6 +206,113 @@ header.screen-header button {
   border-radius: 10px;
   margin-bottom: 8px;
   font-size: 0.9rem;
+}
+
+.friends-panel {
+  background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+  border-radius: var(--card-radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.friends-panel.hidden {
+  display: none;
+}
+
+.friends-list {
+  margin-bottom: 16px;
+}
+
+.friend-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: var(--tg-theme-bg-color, #fff);
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.friend-name {
+  font-weight: 600;
+  flex: 1;
+}
+
+.friend-status {
+  font-size: 0.8rem;
+  color: var(--tg-theme-hint-color, #888);
+}
+
+.invite-block {
+  padding-top: 4px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.field-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--tg-theme-text-color, #000);
+}
+
+.field-hint {
+  font-size: 0.75rem;
+  color: var(--tg-theme-hint-color, #888);
+  margin: 6px 0 12px;
+}
+
+.input-with-prefix {
+  display: flex;
+  align-items: stretch;
+  background: var(--tg-theme-bg-color, #fff);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.input-prefix {
+  display: flex;
+  align-items: center;
+  padding: 0 4px 0 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--tg-theme-hint-color, #888);
+  background: var(--tg-theme-bg-color, #fff);
+}
+
+.input-app {
+  flex: 1;
+  border: none;
+  padding: 14px 14px 14px 4px;
+  font-size: 1rem;
+  background: transparent;
+  color: var(--tg-theme-text-color, #000);
+  outline: none;
+}
+
+.input-app::placeholder {
+  color: var(--tg-theme-hint-color, #aaa);
+}
+
+.btn-block {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.btn-sm {
+  padding: 8px 12px;
+  font-size: 0.85rem;
+}
+
+.btn-secondary {
+  background: var(--tg-theme-secondary-bg-color, #eee);
+  color: var(--tg-theme-text-color, #000);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
 }
 
 .bottom-nav {
@@ -397,7 +559,12 @@ header.screen-header button {
 
 .price {
   font-size: 1.5rem;
-  margin: 12px 0 20px;
+  margin: 0 0 20px;
+}
+
+.premium-until {
+  margin-top: 8px;
+  opacity: 0.95;
 }
 
 .premium-btn {
@@ -426,11 +593,14 @@ header.screen-header button {
 .loading {
   position: fixed;
   inset: 0;
-  background: rgba(255, 255, 255, 0.9);
+  background: color-mix(in srgb, var(--tg-theme-bg-color, #fff) 88%, transparent);
+  backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 400;
+  color: var(--tg-theme-hint-color, #888);
+  font-size: 0.95rem;
 }
 
 .loading.hidden {

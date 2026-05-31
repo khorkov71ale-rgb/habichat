@@ -1,4 +1,4 @@
-import { api, showToast } from '../app.js';
+import { api, showToast, invalidateScreen } from '../app.js';
 
 let habits = [];
 const ICONS = ['⭐', '💪', '📚', '🧘', '💧', '🏃', '😴', '🥗', '✍️', '🎯'];
@@ -110,6 +110,7 @@ export function renderHabits() {
       }
       modal.classList.add('hidden');
       await loadHabits();
+      invalidateScreen('dashboard');
       renderHabits();
       showToast('Сохранено');
     } catch (err) {

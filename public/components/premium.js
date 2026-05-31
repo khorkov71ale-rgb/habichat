@@ -25,9 +25,8 @@ export function renderPremium() {
     </div>
     <div class="pricing">
       <div class="price-card">
-        <h3>HABICHAT Premium</h3>
         <div class="price">⭐ ${premiumData.price || 99} Stars / месяц</div>
-        ${!isPremium ? '<button id="buy-premium-btn" class="premium-btn">Купить Premium</button>' : `<p>До: ${formatDate(premiumData.premiumUntil)}</p>`}
+        ${!isPremium ? '<button type="button" id="buy-premium-btn" class="premium-btn">Приобрести Premium</button>' : `<p class="premium-until">Активен до: ${formatDate(premiumData.premiumUntil)}</p>`}
       </div>
     </div>
   `;
