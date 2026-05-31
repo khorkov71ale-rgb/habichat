@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const { initBot, getBot } = require('../bot');
+const { ensureDb } = require('../database/db');
 
 const rootDir = path.join(__dirname, '..');
 let appInstance = null;
@@ -22,7 +23,20 @@ function createApp() {
 
   const app = express();
   app.use(express.json());
-  app.use(express.static(path.join(rootDir, 'public')));
+
+  app.use(async (req, res, next) => {
+    try {
+      await ensureDb();
+      next();
+    } catch (err) {
+      console.error('DB init error:', err);
+      res.status(500).json({ error: 'Database unavailable', message: err.message });
+    }
+  });
+
+  if (!process.env.VERCEL) {
+    app.use(express.static(path.join(rootDir, 'public')));
+  }
 
   app.use('/api/habits', require('../routes/habits'));
   app.use('/api/social', require('../routes/social'));
@@ -50,9 +64,11 @@ function createApp() {
     res.sendStatus(200);
   });
 
-  app.get('*', (_req, res) => {
-    res.sendFile(path.join(rootDir, 'public', 'index.html'));
-  });
+  if (!process.env.VERCEL) {
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(rootDir, 'public', 'index.html'));
+    });
+  }
 
   app.use((err, _req, res, _next) => {
     console.error('API error:', err);

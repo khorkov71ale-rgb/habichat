@@ -2,7 +2,7 @@
   "name": "habichat",
   "version": "1.0.0",
   "description": "Telegram habit tracker with social features and Mini App",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
@@ -17,7 +17,6 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "node-telegram-bot-api": "^0.66.0",
-    "serverless-http": "^3.2.0",
     "sql.js": "^1.12.0"
   }
 }

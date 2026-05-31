@@ -1,29 +1,10 @@
-const serverless = require('serverless-http');
+/**
+ * Vercel entrypoint — must import express and export the app.
+ * @see https://vercel.com/docs/frameworks/backend/express
+ */
+const express = require('express');
+const { createApp } = require('./lib/express-app');
 
-let handler;
-let booting;
+const app = createApp();
 
-module.exports = async (req, res) => {
-  try {
-    if (!handler) {
-      if (!booting) {
-        booting = (async () => {
-          const { ensureDb } = require('../database/db');
-          await ensureDb();
-          const { createApp } = require('../lib/express-app');
-          handler = serverless(createApp());
-        })();
-      }
-      await booting;
-    }
-    return handler(req, res);
-  } catch (err) {
-    console.error('HABICHAT error:', err);
-    if (!res.headersSent) {
-      res.status(500).json({
-        error: 'Server error',
-        message: err.message,
-      });
-    }
-  }
-};
+module.exports = app;
