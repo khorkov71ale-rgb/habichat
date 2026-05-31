@@ -1,28 +1,24 @@
 const express = require('express');
 const path = require('path');
-const { initBot, getBot } = require('../bot');
 const { ensureDb } = require('../database/db');
 
 const rootDir = path.join(__dirname, '..');
 let appInstance = null;
-let botReady = false;
-
-function ensureBot() {
-  if (!botReady) {
-    try {
-      initBot();
-    } catch (err) {
-      console.error('Bot init error:', err.message);
-    }
-    botReady = true;
-  }
-}
 
 function createApp() {
   if (appInstance) return appInstance;
 
   const app = express();
   app.use(express.json());
+
+  app.get('/health', (_req, res) => {
+    res.json({
+      ok: true,
+      service: 'habichat',
+      platform: process.env.VERCEL ? 'vercel' : 'local',
+      node: process.version,
+    });
+  });
 
   app.use(async (req, res, next) => {
     try {
@@ -45,23 +41,17 @@ function createApp() {
   app.use('/api/premium', require('../routes/premium'));
   app.use('/api/dashboard', require('../routes/dashboard'));
 
-  app.get('/health', (_req, res) => {
-    res.json({
-      ok: true,
-      service: 'habichat',
-      platform: process.env.VERCEL ? 'vercel' : 'local',
-      node: process.version,
-    });
-  });
-
-  ensureBot();
-
-  app.post('/webhook', (req, res) => {
-    const bot = getBot();
-    if (bot && req.body) {
-      bot.processUpdate(req.body);
+  app.post('/webhook', async (req, res) => {
+    try {
+      const { initBot, getBot } = require('../bot');
+      if (!getBot()) initBot();
+      const bot = getBot();
+      if (bot && req.body) bot.processUpdate(req.body);
+      res.sendStatus(200);
+    } catch (err) {
+      console.error('Webhook error:', err);
+      res.sendStatus(200);
     }
-    res.sendStatus(200);
   });
 
   if (!process.env.VERCEL) {
@@ -72,7 +62,9 @@ function createApp() {
 
   app.use((err, _req, res, _next) => {
     console.error('API error:', err);
-    res.status(500).json({ error: err.message || 'Internal error' });
+    if (!res.headersSent) {
+      res.status(500).json({ error: err.message || 'Internal error' });
+    }
   });
 
   appInstance = app;

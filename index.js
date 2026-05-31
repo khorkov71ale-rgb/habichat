@@ -1,10 +1,22 @@
 /**
  * Vercel entrypoint — must import express and export the app.
- * @see https://vercel.com/docs/frameworks/backend/express
  */
 const express = require('express');
-const { createApp } = require('./lib/express-app');
 
-const app = createApp();
+let app;
+
+try {
+  const { createApp } = require('./lib/express-app');
+  app = createApp();
+} catch (err) {
+  console.error('Failed to create app:', err);
+  app = express();
+  app.use((_req, res) => {
+    res.status(500).json({
+      error: 'Startup failed',
+      message: err.message,
+    });
+  });
+}
 
 module.exports = app;
