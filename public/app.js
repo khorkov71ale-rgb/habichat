@@ -57,7 +57,7 @@ const screens = {
 };
 
 const screenCache = new Set();
-let currentScreen = 'dashboard';
+let currentScreen = null;
 let navToken = 0;
 let firstLoad = true;
 

@@ -57,7 +57,10 @@ export function renderSocial() {
           />
         </div>
         <p class="field-hint">Пользователь должен хотя бы раз открыть бота</p>
-        <button type="button" class="btn-primary btn-block" id="invite-btn">Отправить приглашение</button>
+        <button type="button" class="btn-invite" id="invite-btn">
+          <span class="btn-invite-icon" aria-hidden="true">👋</span>
+          <span class="btn-invite-text">Отправить приглашение</span>
+        </button>
       </div>
     </div>
     <div class="feed">

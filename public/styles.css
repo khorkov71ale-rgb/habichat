@@ -209,10 +209,12 @@ header.screen-header button,
 }
 
 .friends-panel {
-  background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+  background: var(--tg-theme-bg-color, #fff);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: var(--card-radius);
   padding: 16px;
   margin-bottom: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .friends-panel.hidden {
@@ -344,18 +346,78 @@ header.screen-header button,
   opacity: 1;
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
+header.screen-header button.btn-add {
+  background: var(--tg-theme-button-color, var(--accent));
+  color: var(--tg-theme-button-text-color, #fff);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1;
+  width: 44px;
+  height: 44px;
+  box-shadow: 0 4px 14px rgba(0, 122, 255, 0.35);
+}
+
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  z-index: 500;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  z-index: 200;
 }
 
 .modal.hidden {
   display: none;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  background: rgba(0, 0, 0, 0.62);
+  cursor: pointer;
+}
+
+.modal-sheet {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 480px;
+  max-height: min(92vh, 720px);
+  background: var(--tg-theme-bg-color, #fff);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-handle {
+  width: 40px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  margin: 10px auto 4px;
+  flex-shrink: 0;
+}
+
+.modal-sheet > h2 {
+  padding: 8px 20px 12px;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.modal-form {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 20px 24px;
+  flex: 1;
+  min-height: 0;
 }
 
 .modal-content {
@@ -368,63 +430,169 @@ header.screen-header button,
   overflow-y: auto;
 }
 
-.modal-content h2 {
-  margin-bottom: 16px;
+.form-field {
+  margin-bottom: 18px;
 }
 
-.modal-content input,
-.modal-content textarea,
-.modal-content select {
+.field-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--tg-theme-text-color, #000);
+}
+
+.field-label .optional {
+  font-weight: 400;
+  color: var(--tg-theme-hint-color, #888);
+}
+
+.field-input {
   width: 100%;
-  padding: 12px;
-  margin-bottom: 12px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
+  padding: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
   font-size: 1rem;
-  background: var(--tg-theme-secondary-bg-color, #f9f9f9);
-  color: inherit;
+  background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+  color: var(--tg-theme-text-color, #000);
+  outline: none;
+}
+
+.field-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+}
+
+.field-textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+.field-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%23888' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 40px;
 }
 
 .icon-picker {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 16px;
 }
 
 .icon-option {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   font-size: 1.5rem;
-  border: 2px solid transparent;
-  border-radius: 10px;
+  border: 2px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
   background: var(--tg-theme-secondary-bg-color, #eee);
   cursor: pointer;
 }
 
 .icon-option.selected {
   border-color: var(--accent);
+  background: rgba(0, 122, 255, 0.12);
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  margin-bottom: 20px;
+  background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.checkbox-row input {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+}
+
+.checkbox-text {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: var(--tg-theme-text-color, #000);
 }
 
 .modal-actions {
   display: flex;
   gap: 12px;
-  margin-top: 16px;
+  margin-top: 4px;
+  padding-top: 4px;
+  flex-shrink: 0;
 }
 
-.modal-actions button {
+.modal-actions .btn-cancel {
   flex: 1;
   padding: 14px;
   border-radius: 12px;
   border: none;
   font-size: 1rem;
   cursor: pointer;
+  background: var(--tg-theme-secondary-bg-color, #eee);
+  color: var(--tg-theme-text-color, #000);
 }
 
-.modal-actions button[type="submit"],
+.modal-actions .btn-submit,
+.modal-actions button[type="submit"] {
+  flex: 1;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--tg-theme-button-color, var(--accent));
+  color: var(--tg-theme-button-text-color, #fff);
+}
+
 .btn-primary {
   background: var(--tg-theme-button-color, var(--accent));
   color: var(--tg-theme-button-text-color, #fff);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-invite {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 15px 18px;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(135deg, #007aff 0%, #5856d6 100%);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(0, 122, 255, 0.35);
+}
+
+.btn-invite:active {
+  transform: scale(0.98);
+}
+
+.btn-invite-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.btn-invite-text {
+  line-height: 1.2;
 }
 
 .activity-card,
