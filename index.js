@@ -67,6 +67,8 @@ function buildApp() {
     const app = express();
     app.use(express.json());
 
+    const publicDir = path.join(rootDir, 'public');
+
     app.get('/health', (_req, res) => {
       res.json({
         ok: true,
@@ -76,7 +78,38 @@ function buildApp() {
       });
     });
 
+    // Mini App + static files (Vercel does not use express.static — serve via sendFile)
+    app.use((req, res, next) => {
+      if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+      if (
+        req.path.startsWith('/api') ||
+        req.path === '/webhook' ||
+        req.path === '/health'
+      ) {
+        return next();
+      }
+
+      let filePath;
+      if (req.path === '/' || req.path === '') {
+        filePath = path.join(publicDir, 'index.html');
+      } else {
+        const safe = path.normalize(req.path).replace(/^(\.\.[/\\])+/, '');
+        filePath = path.join(publicDir, safe);
+        if (!filePath.startsWith(publicDir)) {
+          return res.status(403).end();
+        }
+        if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+          filePath = path.join(publicDir, 'index.html');
+        }
+      }
+
+      return res.sendFile(filePath, (err) => (err ? next(err) : undefined));
+    });
+
     app.use(async (req, res, next) => {
+      if (!req.path.startsWith('/api') && req.path !== '/webhook') {
+        return next();
+      }
       try {
         await ensureDb();
         next();
@@ -85,10 +118,6 @@ function buildApp() {
         res.status(500).json({ error: 'Database unavailable', message: err.message });
       }
     });
-
-    if (!process.env.VERCEL) {
-      app.use(express.static(path.join(rootDir, 'public')));
-    }
 
     app.use('/api/habits', require('./routes/habits'));
     app.use('/api/social', require('./routes/social'));
@@ -109,12 +138,6 @@ function buildApp() {
         res.sendStatus(200);
       }
     });
-
-    if (!process.env.VERCEL) {
-      app.get('*', (_req, res) => {
-        res.sendFile(path.join(rootDir, 'public', 'index.html'));
-      });
-    }
 
     app.use((err, _req, res, _next) => {
       console.error('API error:', err);
