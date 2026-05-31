@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
         booting = (async () => {
           const { ensureDb } = require('../database/db');
           await ensureDb();
-          const { createApp } = require('../app');
+          const { createApp } = require('../lib/express-app');
           handler = serverless(createApp());
         })();
       }

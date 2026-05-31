@@ -146,16 +146,8 @@ async function ensureDb() {
       const migrationSql = loadMigrations();
 
       if (process.env.VERCEL) {
-        try {
-          _db = openNodeSqlite(migrationSql);
-          console.log('DB: node:sqlite');
-          return _db;
-        } catch (err) {
-          console.warn('node:sqlite failed, fallback to sql.js:', err.message);
-          _db = await openSqlJs(migrationSql);
-          console.log('DB: sql.js');
-          return _db;
-        }
+        _db = openNodeSqlite(migrationSql);
+        return _db;
       }
 
       _db = openBetterSqlite(migrationSql);

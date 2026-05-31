@@ -1,5 +1,5 @@
 const config = require('./config');
-const { createApp } = require('./app');
+const { createApp } = require('./lib/express-app');
 const { ensureDb } = require('./database/db');
 
 async function start() {
