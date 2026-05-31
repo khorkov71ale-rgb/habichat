@@ -7,15 +7,17 @@ let botReady = false;
 
 function ensureBot() {
   if (!botReady) {
-    initBot();
+    try {
+      initBot();
+    } catch (err) {
+      console.error('Bot init error:', err.message);
+    }
     botReady = true;
   }
 }
 
 function createApp() {
   if (appInstance) return appInstance;
-
-  ensureBot();
 
   const app = express();
   app.use(express.json());
@@ -29,8 +31,15 @@ function createApp() {
   app.use('/api/dashboard', require('./routes/dashboard'));
 
   app.get('/health', (_req, res) => {
-    res.json({ ok: true, service: 'habichat', platform: process.env.VERCEL ? 'vercel' : 'local' });
+    res.json({
+      ok: true,
+      service: 'habichat',
+      platform: process.env.VERCEL ? 'vercel' : 'local',
+      node: process.version,
+    });
   });
+
+  ensureBot();
 
   app.post('/webhook', (req, res) => {
     const bot = getBot();
@@ -42,6 +51,11 @@ function createApp() {
 
   app.get('*', (_req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  });
+
+  app.use((err, _req, res, _next) => {
+    console.error('API error:', err);
+    res.status(500).json({ error: err.message || 'Internal error' });
   });
 
   appInstance = app;
