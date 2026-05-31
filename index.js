@@ -1,21 +1,28 @@
 const serverless = require('serverless-http');
 
 let handler;
+let booting;
 
 module.exports = async (req, res) => {
   try {
     if (!handler) {
-      const { createApp } = require('../app');
-      handler = serverless(createApp());
+      if (!booting) {
+        booting = (async () => {
+          const { ensureDb } = require('../database/db');
+          await ensureDb();
+          const { createApp } = require('../app');
+          handler = serverless(createApp());
+        })();
+      }
+      await booting;
     }
     return handler(req, res);
   } catch (err) {
-    console.error('HABICHAT boot error:', err);
+    console.error('HABICHAT error:', err);
     if (!res.headersSent) {
       res.status(500).json({
-        error: 'Server startup failed',
+        error: 'Server error',
         message: err.message,
-        hint: 'Check Vercel logs and Node.js 22 in project settings',
       });
     }
   }

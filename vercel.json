@@ -1,12 +1,13 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/(.*)", "destination": "/api" }
+    { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/health", "destination": "/api" },
+    { "source": "/webhook", "destination": "/api" }
   ],
   "functions": {
     "api/index.js": {
-      "maxDuration": 30,
-      "includeFiles": "database/migrations.sql"
+      "maxDuration": 30
     }
   }
 }
