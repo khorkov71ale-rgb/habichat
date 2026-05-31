@@ -6,7 +6,11 @@ function authMiddleware(req, res, next) {
   const initData = req.headers['x-telegram-init-data'] || req.query.initData;
 
   if (!initData) {
-    if (!config.botToken && config.nodeEnv !== 'production') {
+    const allowDev =
+      !config.botToken ||
+      config.nodeEnv !== 'production' ||
+      process.env.ALLOW_BROWSER_DEV === '1';
+    if (allowDev) {
       req.user = findOrCreateUser({
         id: 999001,
         username: 'dev_user',
@@ -25,7 +29,11 @@ function authMiddleware(req, res, next) {
 
   const telegramUser = parseInitDataUser(initData);
   if (!telegramUser) {
-    if (!config.botToken && config.nodeEnv !== 'production') {
+    const allowDev =
+      !config.botToken ||
+      config.nodeEnv !== 'production' ||
+      process.env.ALLOW_BROWSER_DEV === '1';
+    if (allowDev) {
       req.user = findOrCreateUser({
         id: 999001,
         username: 'dev_user',

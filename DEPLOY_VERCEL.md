@@ -147,6 +147,16 @@ vercel
 
 ---
 
+## Важно: структура для Express на Vercel (2024+)
+
+Vercel сам находит Express, если в **корне** есть `index.js`, который:
+- импортирует `express`
+- экспортирует приложение: `module.exports = app`
+
+Папка `api/index.js` **не нужна** (и может ломать деплой). Статика — из папки `public/`.
+
+---
+
 ## Ограничения на Vercel (прочитайте один раз)
 
 | Что | На Vercel |
@@ -166,7 +176,9 @@ vercel
 
 **Бот не отвечает** — проверьте `BOT_TOKEN`, сделайте Redeploy после установки `WEBAPP_URL`.
 
-**Ошибка сборки better-sqlite3** — в Vercel должен быть **Node.js 18+** (Settings → General → Node.js Version).
+**Ошибка 500** — чаще всего старая версия Node. В Vercel: **Settings → General → Node.js Version → 22.x**, затем **Redeploy**. Обновите код на GitHub (исправление базы данных) и задеплойте снова.
+
+**Ошибка сборки better-sqlite3** — на Vercel используется встроенный `node:sqlite` (нужен **Node.js 22**).
 
 ---
 
